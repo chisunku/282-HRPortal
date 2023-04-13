@@ -4,6 +4,7 @@ import './App.css';
 import Home from './pages/Home.jsx';
 import About from './pages/About.jsx';
 import Contact from './pages/Contact.jsx';
+import Login from './pages/login.jsx';
 //import Particles from "react-tsparticles";
 
 class App extends Component {
@@ -11,7 +12,8 @@ class App extends Component {
     return (
       <Router>
         <div>
-          <Route exact path="/" component={Home}/>
+          <Route exact path='/' component={Login} />
+          <Route path="/home" component={Home}/>
           <Route path="/about" component={About}/>
           <Route path="/contact" component={Contact}/>
         </div>

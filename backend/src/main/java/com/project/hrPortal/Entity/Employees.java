@@ -1,16 +1,15 @@
 package com.project.hrPortal.Entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.sql.Date;
+import java.util.List;
 
 @Entity
-@Table(name = "Employee")
-public class Employee {
+@Table(name = "Employees")
+public class Employees {
     @Id
     @Getter@Setter
     private int empNo;
@@ -24,4 +23,6 @@ public class Employee {
     String gender;
     @Getter@Setter
     Date hireDate;
+    @OneToMany(cascade = CascadeType.ALL)
+    List<Titles> titles;
 }

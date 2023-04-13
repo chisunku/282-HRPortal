@@ -1,17 +1,18 @@
 package com.project.hrPortal;
 
-import com.project.hrPortal.Entity.Employee;
+import com.project.hrPortal.Entity.Employees;
 import com.project.hrPortal.Entity.Users;
 import com.project.hrPortal.Service.EmployeeService;
 import com.project.hrPortal.Service.UserLogin;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.sql.Date;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 @RestController
 @RequestMapping(path = "/HrPortal")
@@ -46,7 +47,7 @@ public class UserController {
     }
 
     @GetMapping(path = "/getAllUsers")
-    public Iterable<Users> fetchAll(){
+    public List<Users> fetchAll(){
         System.out.println("coming here");
         ArrayList<Users> c = (ArrayList<Users>) userlogin.findAll();
         for(Users u : c){
@@ -86,8 +87,8 @@ public class UserController {
 
     @GetMapping("/getEmpByEmpNo")
     @ResponseBody
-    public ResponseEntity<Employee> getEmployeeByEmpNo(@RequestParam int empNo){
-        Employee emp = null;
+    public ResponseEntity<Employees> getEmployeeByEmpNo(@RequestParam int empNo){
+        Employees emp = null;
         try{
             emp = employeeService.findEmployeeByEmpNo(empNo);
         }catch(Exception e){
@@ -98,10 +99,10 @@ public class UserController {
     }
 
     @PostMapping("/addEmployee")
-    public Employee addEmployee(@RequestBody Employee emp){
+    public Employees addEmployee(@RequestBody Employees emp){
 //        System.out.println(empNo+" "+birthDate+" "+firstName+" "+lastName+" "+gender+" "+hireDate);
         System.out.println(emp.getEmpNo()+" "+emp.getGender()+" "+emp.getBirthDate());
-        Employee e = new Employee();
+        Employees e = new Employees();
         e.setEmpNo(emp.getEmpNo());
         e.setBirthDate(emp.getBirthDate());
         e.setFirstName(emp.getFirstName());
@@ -109,6 +110,14 @@ public class UserController {
         e.setGender(emp.getGender());
         e.setHireDate(emp.getHireDate());
         return employeeService.save(e);
+    }
+
+    @GetMapping("/testingQuery")
+    public void testingQuery(){
+        List<Users> ans = userlogin.findUsers();
+        for(Users u : ans){
+            System.out.println(u.getEmpId()+" "+u.getPassword());
+        }
     }
 
 }
