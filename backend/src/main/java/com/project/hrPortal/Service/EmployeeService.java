@@ -11,7 +11,7 @@ import java.util.List;
 public interface EmployeeService extends JpaRepository<Employees, Long> {
     public Employees findEmployeeByEmpNo (int empNo);
 
-    @Query("select * from employees e, titles t where e.emp_no = t.emp_no")
-    List<Object[]> getTitles();
+//    @Query("select * from employees e, titles t where e.emp_no = t.emp_no")
+//    List<Object[]> getTitles();
 }
 

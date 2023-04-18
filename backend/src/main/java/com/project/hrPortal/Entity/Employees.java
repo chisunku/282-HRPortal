@@ -23,6 +23,6 @@ public class Employees {
     String gender;
     @Getter@Setter
     Date hireDate;
-    @OneToMany(cascade = CascadeType.ALL)
-    List<Titles> titles;
+//    @OneToMany(cascade = CascadeType.ALL)
+//    List<Titles> titles;
 }

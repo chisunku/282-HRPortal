@@ -11,7 +11,7 @@ import java.util.List;
 public interface UserLogin extends JpaRepository<Users, Long> {
     public Users findUserByEmpId (int empId);
 
-    @Query(value = "SELECT * FROM USER",nativeQuery = true)
-    List<Users> findUsers();
+//    @Query(value = "SELECT * FROM USER",nativeQuery = true)
+//    List<Users> findUsers();
 }
 

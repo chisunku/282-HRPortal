@@ -1,14 +1,13 @@
 package com.project.hrPortal.Entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.sql.Date;
 
 @Entity
+@IdClass(TitlesId.class)
 @Table(name = "Titles")
 public class Titles {
     @Id
@@ -22,4 +21,7 @@ public class Titles {
     Date fromDate;
     @Getter@Setter
     Date toDate;
+    @ManyToOne
+    @JoinColumn(name = "empNo", referencedColumnName = "empNo",  insertable = false, updatable = false)
+    Employees employee;
 }

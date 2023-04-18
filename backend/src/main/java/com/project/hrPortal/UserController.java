@@ -1,16 +1,14 @@
 package com.project.hrPortal;
 
-import com.project.hrPortal.Entity.Employees;
-import com.project.hrPortal.Entity.Users;
-import com.project.hrPortal.Service.EmployeeService;
-import com.project.hrPortal.Service.UserLogin;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.project.hrPortal.Entity.*;
+import com.project.hrPortal.Service.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -23,6 +21,18 @@ public class UserController {
 
     @Autowired
     EmployeeService employeeService;
+
+    @Autowired
+    TitlesService titlesService;
+
+    @Autowired
+    DepartManagerService deptManagerService;
+    @Autowired
+    DeptEmployeeService deptEmpService;
+    @Autowired
+    DepartmentService deptService;
+    @Autowired
+    salariesService salariesService;
 
     @GetMapping(path = "/")
     public String verifyConnection(){
@@ -85,17 +95,94 @@ public class UserController {
 //        return map;
     }
 
-    @GetMapping("/getEmpByEmpNo")
+    @GetMapping("/getEmployeeHomePage")
     @ResponseBody
-    public ResponseEntity<Employees> getEmployeeByEmpNo(@RequestParam int empNo){
-        Employees emp = null;
-        try{
-            emp = employeeService.findEmployeeByEmpNo(empNo);
-        }catch(Exception e){
-            e.printStackTrace();
+    public ObjectNode getEmployeeByEmpNo(@RequestParam int empNo){
+        ObjectMapper mapper = new ObjectMapper();
+        ObjectNode json = mapper.createObjectNode();
+        Employees emp = employeeService.findEmployeeByEmpNo(empNo);
+        List<Titles> t = null;
+        //get title
+        if(emp!=null){
+            json.put("empNo", emp.getEmpNo());
+            json.put("firstName", emp.getFirstName());
+            json.put("lastName", emp.getLastName());
+            json.put("gender", emp.getGender());
+            json.put("hireDate", emp.getHireDate().toString());
+//            System.out.println("emp det : "+emp.getEmpNo()+" "+emp.getFirstName());
+            t = titlesService.findTitlesByEmployee(emp);
+            if(t.size()>0) {
+                Collections.sort(t, (a, b) -> a.getFromDate().compareTo(b.getFromDate()));
+                json.put("title", t.get(0).getTitle());
+                json.put("Titlefrom", t.get(0).getFromDate().toString());
+                json.put("TitleTo", t.get(0).getToDate().toString());
+            }
+            else{
+                json.put("title", "");
+                json.put("Titlefrom", "");
+                json.put("TitleTo", "");
+            }
         }
-        System.out.println("fetched: "+emp.getLastName()+" "+emp.getFirstName());
-        return new ResponseEntity(emp, HttpStatus.OK);
+        else{
+            json.put("empNo", "");
+            json.put("name", "");
+            json.put("gender", "");
+            json.put("hireDate", "");
+        }
+        //get dept for emp
+        List<deptEmployee> deptEmp = null;
+        if(emp!=null){
+            deptEmp = deptEmpService.findDepartmentByEmpNo(emp.getEmpNo());
+            Collections.sort(deptEmp, (a,b) -> a.getFromDate().compareTo(b.getFromDate()));
+//            System.out.println(deptEmp.get(0).getDeptNo());
+        }
+        //get manager
+        List<DeptManager> mgr = null;
+        if(deptEmp.size()!=0){
+            mgr = deptManagerService.findManagersByDeptNo(deptEmp.get(0).getDeptNo());
+            Collections.sort(mgr, (a,b) -> a.getFromDate().compareTo(b.getFromDate()));
+//            System.out.println(mgr.get(0).getEmpNo());
+        }
+        //get manager details
+        Employees manager = null;
+        if(deptEmp.size()>0){
+            manager = employeeService.findEmployeeByEmpNo(mgr.get(0).getEmpNo());
+            if(manager != null) {
+//                System.out.println("manager: " + manager.getEmpNo() + " " + manager.getFirstName());
+                json.put("manager", manager.getFirstName() + " " + manager.getLastName());
+                json.put("manager_empNo", manager.getEmpNo());
+            }
+            else{
+                json.put("manager", "");
+                json.put("manager_empNo", "");
+            }
+        }
+        //get department name
+        Departments dept = null;
+        if(deptEmp!=null){
+            dept = deptService.findDepartmentByDeptNo(deptEmp.get(0).getDeptNo());
+            if(dept!=null) {
+//                System.out.println("depart name : " + dept.getDeptName());
+                json.put("department", dept.getDeptName());
+            }
+            else{
+                json.put("department", "");
+            }
+        }
+        //salary
+        List<salaries> salary = null;
+        if(emp!=null){
+            salary = salariesService.findSalaryByEmpNo(emp.getEmpNo());
+            if(salary.size()>0){
+                Collections.sort(salary, (a,b)->a.getFromDate().compareTo(b.getFromDate()));
+//                System.out.println(salary.size());
+                json.put("salary", salary.get(0).getSalary());
+            }
+            else{
+                json.put("salary", "");
+            }
+        }
+        return json;
     }
 
     @PostMapping("/addEmployee")
@@ -113,11 +200,13 @@ public class UserController {
     }
 
     @GetMapping("/testingQuery")
-    public void testingQuery(){
-        List<Users> ans = userlogin.findUsers();
-        for(Users u : ans){
-            System.out.println(u.getEmpId()+" "+u.getPassword());
+    public List<Titles> testingQuery(int empNo){
+        Employees emp = employeeService.findEmployeeByEmpNo(empNo);
+        if(emp!=null){
+            System.out.println("emp det : "+emp.getEmpNo()+" "+emp.getFirstName());
+            return titlesService.findTitlesByEmployee(emp);
         }
+        return null;
     }
 
 }

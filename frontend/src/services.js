@@ -21,8 +21,8 @@ function empInfo(empNo) {
             method: 'GET',
             headers: { "Content-Type": "application/json" }
         }
-        return fetch('http://localhost:8080/HrPortal/getEmpByEmpNo?empNo='+empNo, requestOption).then(res => {
-            console.log(res);
+        return fetch('http://localhost:8080/HrPortal/getEmployeeHomePage?empNo='+empNo, requestOption).then(res => {
+            // console.log(res);
             return res;
         })
     }
