@@ -14,7 +14,7 @@ function login(props) {
     const history = useHistory();
 
     const userLogin = async (e) => {
-        localStorage.setItem('token-info', empID);
+        localStorage.setItem('employee', empID);
         e.preventDefault();
         const res = await service.checkUser(empID, password).then(json => {return json});
         console.log(res);

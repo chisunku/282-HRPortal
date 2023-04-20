@@ -1,6 +1,7 @@
 package com.project.hrPortal;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.project.hrPortal.Entity.*;
 import com.project.hrPortal.Service.*;
@@ -130,7 +131,7 @@ public class UserController {
             json.put("hireDate", "");
         }
         //get dept for emp
-        deptEmployee deptEmp = null;
+        List<deptEmployee> deptEmp = null;
         if(emp!=null){
             deptEmp = deptEmpService.findDepartmentByEmpNo(emp.getEmpNo());
 //            Collections.sort(deptEmp, (a,b) -> a.getFromDate().compareTo(b.getFromDate()));
@@ -139,7 +140,7 @@ public class UserController {
         //get manager
         List<DeptManager> mgr = null;
         if(deptEmp!=null){
-            mgr = deptManagerService.findManagersByDeptNo(deptEmp.getDeptNo());
+            mgr = deptManagerService.findManagersByDeptNo(deptEmp.get(0).getDeptNo());
             Collections.sort(mgr, (a,b) -> a.getFromDate().compareTo(b.getFromDate()));
 //            System.out.println(mgr.get(0).getEmpNo());
         }
@@ -160,7 +161,7 @@ public class UserController {
         //get department name
         Departments dept = null;
         if(deptEmp!=null){
-            dept = deptService.findDepartmentByDeptNo(deptEmp.getDeptNo());
+            dept = deptService.findDepartmentByDeptNo(deptEmp.get(0).getDeptNo());
             if(dept!=null) {
 //                System.out.println("depart name : " + dept.getDeptName());
                 json.put("department", dept.getDeptName());
@@ -209,13 +210,16 @@ public class UserController {
         return null;
     }
 
-    @GetMapping("/getTeamInfo")
-    public ObjectNode teamInfo(@RequestParam int empNo){
+    @GetMapping("/getManagerInfo")
+    public ObjectNode managerInfo(@RequestParam int empNo){
+        System.out.println("-----getManagerInfo-------");
         ObjectMapper mapper = new ObjectMapper();
         ObjectNode json = mapper.createObjectNode();
-        deptEmployee deptEmp =  deptEmpService.findDepartmentByEmpNo(empNo);
+        List<deptEmployee> deptEmp =  deptEmpService.findDepartmentByEmpNo(empNo);
+        if(deptEmp.size()>0)
+            Collections.sort(deptEmp, (a,b)->a.getFromDate().compareTo(b.getFromDate()));
         //manager and dept
-        List<DeptManager> manager = deptManagerService.findManagersByDeptNo(deptEmp.getDeptNo());
+        List<DeptManager> manager = deptManagerService.findManagersByDeptNo(deptEmp.get(0).getDeptNo());
         if(manager.size()>0){
             Collections.sort(manager, (a,b)->a.getFromDate().compareTo(b.getFromDate()));
             System.out.println(manager.get(0).getEmpNo());
@@ -226,24 +230,52 @@ public class UserController {
             json.put("managerEmpId", mgr.getEmpNo());
             json.put("managerFirstName", mgr.getFirstName());
             json.put("managerLastName", mgr.getLastName());
-            json.put("departmentNo", deptEmp.getDeptNo());
+            json.put("managerGender", mgr.getGender());
+            json.put("departmentNo", deptEmp.get(0).getDeptNo());
         }
         //depart info
-        Departments dept = deptService.findDepartmentByDeptNo(deptEmp.getDeptNo());
+        Departments dept = deptService.findDepartmentByDeptNo(deptEmp.get(0).getDeptNo());
         if(dept!=null){
             json.put("department", dept.getDeptName());
         }
-        //emp from that
+        return json;
+    }
+
+    @GetMapping("/getTeamInfo")
+    public ObjectNode teamInfo(@RequestParam int empNo){
+        System.out.println("-----getTeamInfo-------");
+        ObjectMapper mapper = new ObjectMapper();
+        ObjectNode json = mapper.createObjectNode();
+        List<deptEmployee> deptEmp =  deptEmpService.findDepartmentByEmpNo(empNo);
+        if(deptEmp.size()>0)
+            Collections.sort(deptEmp, (a,b)->a.getFromDate().compareTo(b.getFromDate()));
+        //manager and dept
+        //depart info
+        Departments dept = deptService.findDepartmentByDeptNo(deptEmp.get(0).getDeptNo());
+        if(dept==null)
+            return json;
         List<deptEmployee> team = deptEmpService.findAllByDeptNo(dept.getDeptNo());
         List<Employees> emps = new ArrayList<>();
+        ArrayNode employeeNode = json.putArray("employees");
         for(deptEmployee d : team){
-            System.out.println(d.getEmpNo());
+//            System.out.println(d.getEmpNo());
             Employees e = employeeService.findEmployeeByEmpNo(d.getEmpNo());
             emps.add(e);
+            ObjectNode empNode = mapper.createObjectNode();
+            empNode.put("empNo",e.getEmpNo());
+            empNode.put("empFirstName", e.getFirstName());
+            empNode.put("empLastName",e.getLastName());
+            List<Titles> t = titlesService.findTitlesByEmployee(e);
+            Collections.sort(t,(a,b)->a.getFromDate().compareTo(b.getFromDate()));
+            if(t.size()>0){
+                empNode.put("empTitle", t.get(0).getTitle());
+            }
+            employeeNode.add(empNode);
         }
-        if(emps.size()>0){
-            json.put("Team",new JSONArray(emps));
-        }
+        System.out.println("emp size: "+emps.size());
+//        if(emps.size()>0){
+//            json.putArray("Team",emps);
+//        }
         return json;
     }
 

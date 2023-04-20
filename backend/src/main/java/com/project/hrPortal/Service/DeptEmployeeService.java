@@ -9,4 +9,6 @@ import java.util.List;
 @Service
 public interface DeptEmployeeService extends JpaRepository<deptEmployee, Long> {
     public List<deptEmployee> findDepartmentByEmpNo(int empNo);
+
+    public List<deptEmployee> findAllByDeptNo(String deptNo);
 }

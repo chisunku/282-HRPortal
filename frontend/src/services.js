@@ -1,6 +1,8 @@
 export const service = {
     checkUser,
-    empInfo
+    empInfo,
+    teamInfo,
+    manager
 }
 
 function checkUser(username, password){
@@ -25,4 +27,26 @@ function empInfo(empNo) {
             // console.log(res);
             return res;
         })
+}
+
+function teamInfo(empNo){
+    const requestOption = {
+        method: 'GET',
+        headers: { "Content-Type": "application/json" }
     }
+    return fetch('http://localhost:8080/HrPortal/getTeamInfo?empNo='+empNo, requestOption).then(res => {
+        console.log(res);
+        return res;
+    })
+}
+
+function manager(empNo){
+    const requestOption = {
+        method: 'GET',
+        headers: { "Content-Type": "application/json" }
+    }
+    return fetch('http://localhost:8080/HrPortal/getManagerInfo?empNo='+empNo, requestOption).then(res => {
+        console.log(res);
+        return res;
+    })
+}

@@ -1,27 +1,80 @@
-import React, { Component } from 'react';
+import React, { useState, useEffect } from 'react';
 import Footer from '../components/Footer.jsx';
 import Navbar from '../components/Navbar.jsx';
 import Jumbotron from '../components/Jumbotron.jsx';
+import { service } from '../services.js';
+import Table from '../components/table.jsx';
 
-class About extends Component {
-  render() {
+function About(props) {
+
+  const[emps, setEmps] = useState([]);
+  const[empID, setEmpId] = useState(localStorage.getItem('employee'));
+  const[manager, setManager] = useState({});
+
+  console.log("emp id in about ",empID);
+
+  useEffect( () => {
+    async function getEmpDetails(){
+      await service.teamInfo(empID).then(resp => resp.json()).then(data => {
+        // console.log("in about: ",data.employees);
+        setEmps(data.employees);
+        console.log("in about: ",typeof(data)," ",data," keys:",Object.keys(data));
+      });
+    }
+    async function getManagerDetails(){
+      await service.manager(empID).then(resp => resp.json()).then(data => {
+        console.log("in about: ",data);
+        setManager(data);
+      });
+    }
+    getManagerDetails();
+    getEmpDetails();
+  },[]);
+
+  const outlook = () => {
+    console.log('outlook');
+    window.location.href = "mailto:"+manager.managerFirstName+"."+manager.managerLastName+"@outlook.com";
+  }
+
+  const linkedin = () => {
+    console.log('linkedin');
+    window.open('https://www.linkedin.com/search/results/all/?keywords='+manager.managerFirstName+"%20"+manager.managerLastName+"&origin=GLOBAL_SEARCH_HEADER&sid=cVv", "_blank");
+  }
+
+  // render() {
     return (
       <div>
         <Navbar />
-        <Jumbotron title="About Me!" subtitle="This page is all about me and my work!"/>
+        <Jumbotron title="Team" subtitle="This page is all about me and my work!"/>
         <div className="container">
-          <h2>About</h2>
-          <p>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc placerat orci eu nulla sagittis, pulvinar dignissim lectus consequat. Etiam in lobortis ligula, vitae ornare lacus. Vivamus scelerisque lorem arcu, vitae eleifend ex commodo a. Quisque rutrum, augue sit amet egestas efficitur, magna nulla lacinia elit, sed suscipit tortor erat vitae enim. Donec egestas odio id aliquet rhoncus. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Quisque mi dolor, egestas nec lacinia non, sodales eu lacus. Donec ultricies nec elit ac ornare. Quisque fermentum ligula ut feugiat cursus. Aliquam auctor suscipit ex a lacinia. Mauris sollicitudin, justo quis fringilla finibus, dui diam ullamcorper nulla, sit amet placerat justo neque quis quam. Praesent nec nibh at tortor ornare dignissim. Morbi tincidunt fringilla turpis at luctus. Vivamus dapibus ligula eget pellentesque luctus. Maecenas ut consectetur lacus, non dignissim nisi. Praesent sodales tellus sit amet faucibus tempus.
-          </p>
-          <p>
-            Maecenas dapibus, est posuere eleifend rutrum, lectus ligula gravida urna, at pretium dui turpis non lorem. Donec pretium lorem ipsum, at fermentum nibh consequat facilisis. Sed maximus massa est, vel porta diam placerat id. Vivamus imperdiet lorem eget dolor bibendum, eget gravida tellus interdum. Sed lectus odio, condimentum eu porttitor vel, euismod sit amet urna. Nam quis dui a nibh rhoncus aliquam vitae in metus. Nam sit amet semper turpis. Suspendisse eu malesuada tortor, vel lacinia nisl. Phasellus ultrices vehicula magna, sed tempor neque dapibus quis. Phasellus urna justo, sollicitudin ac odio eget, convallis varius nulla. Vivamus in lacinia lorem, at eleifend nulla. Nulla nec luctus purus. Integer id purus mauris. Phasellus finibus ultricies erat a tempus. Nulla luctus sem nec justo venenatis, eu faucibus purus congue.
-          </p>
+          {/* manager card */}
+          <div className='Card'> 
+            <div className='upper-container'>
+              <h2 className='centerElement'>{manager.managerFirstName+" "+manager.managerLastName}</h2>
+                <div className='image-container'>
+                     {manager.managerGender=='F'?<img src={require('/Users/sunku/Desktop/SJSU/Sem-2/282/282-HRPortal/frontend/src/images/man.png')} />:
+                  <img className='image' src={require('/Users/sunku/Desktop/SJSU/Sem-2/282/282-HRPortal/frontend/src/images/man.png')} /> }
+                </div>
+            </div>
+            <div className='lower-container'>
+                <h2 className='centerAlign'>Title: Manager</h2>
+            </div>
+            <div style={{padding:'0% 0% 0% 3%'}}>
+              <h10>Contact methods</h10>
+              <l1 className='contacts'>
+                <ul><img width={20} height={20} onClick={() => outlook()} 
+                  src={require('/Users/sunku/Desktop/SJSU/Sem-2/282/282-HRPortal/frontend/src/images/email.jpeg')} /></ul>
+                <ul><img width={20} height={20} onClick={() => linkedin()} 
+                  src={require('/Users/sunku/Desktop/SJSU/Sem-2/282/282-HRPortal/frontend/src/images/linkedin.png')} /></ul>
+              </l1>
+            </div>
         </div>
+        </div>
+        <Table data={emps} />
         <Footer />
       </div>
     );
-  }
+  // }
 }
 
 export default About
