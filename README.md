@@ -13,7 +13,7 @@ npm start
 
 ## Steps to run the back-end
 1. clone the repo
-2. add mongodb url to [application.properties](https://github.com/chisunku/cmpe-282-backend#:~:text=1%20minute%20ago-,package.json,-entire%20backend)
+2. add mongodb url to [application.properties](https://github.com/chisunku/282-HRPortal/blob/main/backend/src/main/resources/application.properties)
 3. install node modules
 ```
 npm install
